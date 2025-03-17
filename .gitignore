@@ -1,0 +1,12 @@
+/.vs
+/x64
+textures/
+/OpenGL2
+
+download.png
+test.png
+
+OpenGL2.sln
+OpenGL2.vcxproj
+OpenGL2.vcxproj.filters
+OpenGL2.vcxproj.user
