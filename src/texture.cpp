@@ -42,6 +42,13 @@ void Texture2D::uniform(int uniformID, float unit)
 
 void Texture2D::Bind()
 {
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(type, ID);
+}
+
+void Texture2D::Activate(int unit)
+{
+	glActiveTexture(GL_TEXTURE0 + unit);
 	glBindTexture(type, ID);
 }
 

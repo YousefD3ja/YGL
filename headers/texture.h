@@ -26,6 +26,9 @@ class Texture2D
 		void uniform(int uniformID, float unit);
 		// Binds the texture as the current active GL_TEXTURE_2D texture object
 		void Bind();
+
+		// Activates texture in a specified unit
+		void Activate(int unit);
 		// Unbinds the texture
 		void Unbind();
 		// Deletes the texture
