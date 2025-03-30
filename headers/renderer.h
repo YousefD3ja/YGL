@@ -4,6 +4,8 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <viewport.h>
+#include <iostream>
+#include <windows.h>
 
 class Renderer
 {
@@ -11,11 +13,19 @@ public:
 	int viewportIndex;
 	float Rviewport[4];
 	GLFWwindow* window;
-	int SCR_WIDTH;
-	int SCR_HEIGHT;
+	GLFWmonitor* monitor = nullptr;
+	const GLFWvidmode* vidMode = nullptr;
+	int Width;
+	int Height;
 
-	Renderer(unsigned int width, unsigned int height, const char* title, Viewport* viewport);
+	bool isFullScreen;
+	bool updateViewport;
+	bool screenChanged = false;
+
+	Renderer(unsigned int width, unsigned int height, const char* title, bool FullScreen, Viewport* viewport);
 	~Renderer();
+	void SetWindowFullScreen(Viewport& viewport);
+	void SetWindowWindowed(Viewport& viewport, int screenWidth, int screenHeight);
 		/*void clear();
 		void swapBuffers();
 		void pollEvents();

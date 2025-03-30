@@ -1,8 +1,7 @@
 #include <renderer.h>
-#include <iostream>
 
 
-Renderer::Renderer(unsigned int width, unsigned int height, const char* title, Viewport* viewport)
+Renderer::Renderer(unsigned int width, unsigned int height, const char* title, bool FullScreen, Viewport* viewport)
 {
 	// Initialize GLFW
 	glfwInit();
@@ -11,6 +10,7 @@ Renderer::Renderer(unsigned int width, unsigned int height, const char* title, V
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
 	// Set GLFW to use the core profile
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	// Create a GLFW window
 	window = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (window == NULL)
@@ -18,10 +18,21 @@ Renderer::Renderer(unsigned int width, unsigned int height, const char* title, V
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 	}
+
+	Width = width;
+	Height = height;
+
+
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
+
 	// Load GLAD to configure OpenGL
 	gladLoadGL(glfwGetProcAddress);
+
+	if (FullScreen)
+	{
+		screenChanged = true;
+	}
 	// Specify the viewport of OpenGL in the Window
 
 	// Initialize default viewport
@@ -53,3 +64,23 @@ void swapBuffers()
 //void pollEvents();
 //void terminate();
 //GLFWwindow* getWindow();
+
+void Renderer::SetWindowFullScreen(Viewport& viewport)
+{
+	monitor = glfwGetPrimaryMonitor();
+	vidMode = glfwGetVideoMode(monitor);
+	glfwSetWindowMonitor(window, monitor, 0, 0, vidMode->width, vidMode->height, GLFW_DONT_CARE);
+
+	glfwGetWindowSize(window, &Width, &Height);
+	viewport.setViewportf(0, 0, 0, Width, Height);
+
+	Sleep(100);
+}
+void Renderer::SetWindowWindowed(Viewport& viewport, int screenWidth, int screenHeight)
+{
+	glfwSetWindowMonitor(window, NULL, 200, 200, (float)screenWidth, (float)screenHeight, GLFW_DONT_CARE);
+
+	glfwGetWindowSize(window, &Width, &Height);
+	viewport.setViewportf(0, 0, 0, screenWidth, screenHeight);
+	Sleep(100);
+}
