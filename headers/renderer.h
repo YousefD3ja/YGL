@@ -26,6 +26,8 @@ public:
 	~Renderer();
 	void SetWindowFullScreen(Viewport& viewport);
 	void SetWindowWindowed(Viewport& viewport, int screenWidth, int screenHeight);
+
+	void setWindowTitle(std::string title);
 		/*void clear();
 		void swapBuffers();
 		void pollEvents();

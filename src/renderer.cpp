@@ -84,3 +84,8 @@ void Renderer::SetWindowWindowed(Viewport& viewport, int screenWidth, int screen
 	viewport.setViewportf(0, 0, 0, screenWidth, screenHeight);
 	Sleep(100);
 }
+
+void Renderer::setWindowTitle(std::string title)
+{
+	glfwSetWindowTitle(window,title.c_str());
+}
