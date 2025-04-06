@@ -4,6 +4,8 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <viewport.h>
+#include <buffers.h>
+#include <objects.h>
 #include <iostream>
 #include <windows.h>
 
@@ -18,6 +20,10 @@ public:
 	int Width;
 	int Height;
 
+	int SCR_Width;
+	int SCR_Height;
+
+	bool ShouldClose;
 	bool isFullScreen;
 	bool updateViewport;
 	bool screenChanged = false;
@@ -28,6 +34,10 @@ public:
 	void SetWindowWindowed(Viewport& viewport, int screenWidth, int screenHeight);
 
 	void setWindowTitle(std::string title);
+
+	void getFrames(double* current, double* last, unsigned int* counter, double* retValue);
+
+	//static void Draw(Renderer* renderer, Camera* camera, Viewport* viewport, ChunkTest::Chunk* chunklist, Shader* shader, VAO* vao, Texture2D* textures, void* input);
 		/*void clear();
 		void swapBuffers();
 		void pollEvents();

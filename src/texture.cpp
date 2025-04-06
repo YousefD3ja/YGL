@@ -23,6 +23,7 @@ Texture2D::Texture2D(const char* texture,unsigned int numTex, GLenum textureType
 
 	stbi_image_free(bytes);
 	glBindTexture(textureType, 0);
+
 }
 
 void Texture2D::textureUnit(Shader& shader, const char* uniform, int unit)

@@ -5,6 +5,14 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <objects.h>
+
+namespace ChunkTest
+{
+	class Chunk;
+	typedef struct chunk;
+	enum blockTypes;
+}
 
 enum cameraMovement
 {
@@ -21,6 +29,9 @@ const float PITCH = 0.0f;
 const float SPEED = 10.0f;
 const float SENSITIVITY = 0.2f;
 const float ZOOM = 45.0f;
+
+
+
 
 class Camera
 {
@@ -63,12 +74,18 @@ class Camera
 		glm::mat4 projection = glm::mat4(1.0f);
 
 
+		ChunkTest::chunk* currentChunk;
+
+		ChunkTest::blockTypes currentBlock;
+
+		bool placedBlock;
+
 		float fov;
 
 
 		void setCameraView();
 
-		void SetPerspective(float angle, float screenWidth, float screenHeight, float near, float far);
+		void SetPerspective(float angle, float screenWidth, float screenHeight, float nearf, float farf);
 
 		void InitializeView(glm::vec3 vector);
 

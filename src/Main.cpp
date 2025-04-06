@@ -14,6 +14,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <thread>
 #include <objects.h>
+#include <physics.h>
 
 const double PI = 3.141592653589793;
 
@@ -27,8 +28,14 @@ bool firstMouse = true;
 
 float yaw, pitch;
 
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
+double deltaTime = 0.0f;
+double lastFrame = 0.0f;
+
+unsigned int counter;
+
+bool windowState;
+
+double FPS;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -329,41 +336,6 @@ int main()
 	};
 
 	ChunkTest::Chunk testChunk(glm::vec3(0.0f, 0.0f, 0.0));
-	/*testChunk.addChunk();
-	testChunk.addChunk();
-	testChunk.addChunk();
-	testChunk.addChunk();*/
-
-	/*for (auto c : testChunk.chunks)
-	{
-		std::cout << "ID:" << c.ID << std::endl;
-		std::cout <<
-			"X:" << c.Position.x <<
-			",Y:" << c.Position.y <<
-			",Z:" << c.Position.z << std::endl;
-	}*/
-
-	testChunk.addChunkList(3);
-
-	//testChunk.setBlock(testChunk.chunks.at(2), ChunkTest::blockTypes::DIRT, glm::vec3(-8.0f, 5.0f, 2.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(2), ChunkTest::blockTypes::GRASS, glm::vec3(-5.0f, 5.0f, 8.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(2), ChunkTest::blockTypes::DIRT, glm::vec3(-8.0f, 5.0f, 8.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(2), ChunkTest::blockTypes::DIRT, glm::vec3(-8.0f, 5.0f, 4.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(2), ChunkTest::blockTypes::GRASS, glm::vec3(-8.0f, 5.0f, 5.0f), true);
-
-
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::GRASS, glm::vec3(-7.0f, 5.0f, 8.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::DIRT, glm::vec3(-5.0f, 5.0f, 6.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::GRASS, glm::vec3(-8.0f, 5.0f, 5.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::DIRT, glm::vec3(-6.0f, 5.0f, 2.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::GRASS, glm::vec3(-5.0f, 5.0f, 5.0f), true);
-
-
-	//testChunk.setBlock(testChunk.chunks.at(1), ChunkTest::blockTypes::DIRT, glm::vec3(-8.0f, 5.0f, 8.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(1), ChunkTest::blockTypes::GRASS, glm::vec3(-5.0f, 5.0f, 7.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(1), ChunkTest::blockTypes::DIRT, glm::vec3(-7.0f, 5.0f, 5.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(1), ChunkTest::blockTypes::GRASS, glm::vec3(-12.0f, 5.0f, 14.0f), true);
-	//testChunk.setBlock(testChunk.chunks.at(1), ChunkTest::blockTypes::DIRT, glm::vec3(-3.0f, 5.0f, 7.0f), true);
 
 	for (unsigned int c = 0; c < testChunk.chunks.size(); c++)
 	{
@@ -386,90 +358,12 @@ int main()
 		}
 	}
 
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::GRASS, glm::vec3(0, 8, 0), true);
-	//testChunk.setBlock(testChunk.chunks.at(0), ChunkTest::blockTypes::DIRT, glm::vec3(0, 8, 0), true);
-
-	//testChunk.loadBlocks();
-	//testChunk.loadChunk(testChunk.chunks.at(2));
-
-	//for (auto c : testChunk.chunks)
-	//{
-	//	std::cout << "ID:" << c.ID << std::endl;
-	//	std::cout <<
-	//		"X:" << c.Position.x <<
-	//		",Y:" << c.Position.y <<
-	//		",Z:" << c.Position.z << std::endl;
-	//	
-	//	std::cout << "blocks{" << std::endl;
-	//	for (auto b : c.blocks)
-	//	{
-	//		std::cout << "ID:" << b.ID;
-	//		std::cout << ",TYPE:" << b.type;
-	//		std::cout << ",STATE:" << b.IsSolid;
-	//		std::cout << ",X:" << b.Position.x;
-	//		std::cout << ",Y:" << b.Position.y;
-	//		std::cout << ",Z:" << b.Position.z << std::endl;;
-	//	}
-
-	//	std::cout << "}" << std::endl;
-
-	//}
-
-	//std::cout << "00000000000000" << std::endl;
-
-	//for (auto c : testChunk.chunks)
-	//{
-	//	for (auto b : c.blocks)
-	//	{
-	//		std::cout << "ID:" << b.ID << std::endl;;
-	//		for (unsigned int j = 0; j < 6; j++)
-	//		{
-	//			for (unsigned int i = 0; i < 6; i += 5)
-	//			{
-	//				std::cout << "{";
-	//				std::cout << b.facesVertices[j][i];
-	//				std::cout << "," << b.facesVertices[j][i + 1];
-	//				std::cout << "," << b.facesVertices[j][i + 2];
-	//				std::cout << "," << b.facesVertices[j][i + 3];
-	//				std::cout << "," << b.facesVertices[j][i + 4];
-	//				std::cout << "}" << std::endl;;
-	//			}
-	//		}
-	//	}
-	//	/*if(c.ChunkVertices != nullptr)
-	//	{
-	//		std::cout << "ChunkID:" << c.ID << std::endl;
-	//		for (unsigned int i = 0; i < sizeof(c.ChunkVertices); i += 5)
-	//		{
-	//			std::cout << "{";
-	//			std::cout << c.ChunkVertices[i];
-	//			std::cout << "," << c.ChunkVertices[i + 1];
-	//			std::cout << "," << c.ChunkVertices[i + 2];
-	//			std::cout << "," << c.ChunkVertices[i + 3];
-	//			std::cout << "," << c.ChunkVertices[i + 4];
-	//			std::cout << "}" << std::endl;;
-	//		}
-	//	}*/
-
-	//}
-
-
-	// Block Buffers
-	/*VAO BlocksVAO;
-	BlocksVAO.Bind();
-	VBO BlocksVBO(plane2, sizeof(plane2));
-	EBO planeEBO(planeIndices, sizeof(planeIndices));
-	planeVao.LinkAttrib(planeVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
-	planeVao.LinkAttrib(planeVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-	planeVao.Unbind();
-	planeVBO.Unbind();*/
-
 	// Front face
 	VAO BlocksFrontVAO;
 	BlocksFrontVAO.Bind();
 
-	VBO BlocksFrontVBO(testChunk.chunks.at(0).facesVertices[0], sizeof(testChunk.chunks.at(0).facesVertices[1]));
-	EBO BlocksFrontEBO(testChunk.chunks.at(0).facesIndices, sizeof(testChunk.chunks.at(0).facesIndices));
+	VBO BlocksFrontVBO(testChunk.ChunkVertices[0], sizeof(testChunk.ChunkVertices[0]));
+	EBO BlocksFrontEBO(testChunk.ChunkIndices, sizeof(testChunk.ChunkIndices));
 	BlocksFrontVAO.LinkAttrib(BlocksFrontVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
 	BlocksFrontVAO.LinkAttrib(BlocksFrontVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	BlocksFrontVAO.Unbind();
@@ -480,8 +374,8 @@ int main()
 	VAO BlocksRightVAO;
 	BlocksRightVAO.Bind();
 
-	VBO BlocksRightVBO(testChunk.chunks.at(0).facesVertices[1], sizeof(testChunk.chunks.at(0).facesVertices[1]));
-	EBO BlocksRightEBO(testChunk.chunks.at(0).facesIndices, sizeof(testChunk.chunks.at(0).facesIndices));
+	VBO BlocksRightVBO(testChunk.ChunkVertices[1], sizeof(testChunk.ChunkVertices[1]));
+	EBO BlocksRightEBO(testChunk.ChunkIndices, sizeof(testChunk.ChunkIndices));
 	BlocksRightVAO.LinkAttrib(BlocksRightVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
 	BlocksRightVAO.LinkAttrib(BlocksRightVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	BlocksRightVAO.Unbind();
@@ -492,8 +386,8 @@ int main()
 	VAO BlocksBackVAO;
 	BlocksBackVAO.Bind();
 
-	VBO BlocksBackVBO(testChunk.chunks.at(0).facesVertices[2], sizeof(testChunk.chunks.at(0).facesVertices[2]));
-	EBO BlocksBackEBO(testChunk.chunks.at(0).facesIndices, sizeof(testChunk.chunks.at(0).facesIndices));
+	VBO BlocksBackVBO(testChunk.ChunkVertices[2], sizeof(testChunk.ChunkVertices[2]));
+	EBO BlocksBackEBO(testChunk.ChunkIndices, sizeof(testChunk.ChunkIndices));
 	BlocksBackVAO.LinkAttrib(BlocksBackVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
 	BlocksBackVAO.LinkAttrib(BlocksBackVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	BlocksBackVAO.Unbind();
@@ -504,8 +398,8 @@ int main()
 	VAO BlocksLeftVAO;
 	BlocksLeftVAO.Bind();
 
-	VBO BlocksLeftVBO(testChunk.chunks.at(0).facesVertices[3], sizeof(testChunk.chunks.at(0).facesVertices[3]));
-	EBO BlocksLeftEBO(testChunk.chunks.at(0).facesIndices, sizeof(testChunk.chunks.at(0).facesIndices));
+	VBO BlocksLeftVBO(testChunk.ChunkVertices[3], sizeof(testChunk.ChunkVertices[3]));
+	EBO BlocksLeftEBO(testChunk.ChunkIndices, sizeof(testChunk.ChunkIndices));
 	BlocksLeftVAO.LinkAttrib(BlocksLeftVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
 	BlocksLeftVAO.LinkAttrib(BlocksLeftVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	BlocksLeftVAO.Unbind();
@@ -516,8 +410,8 @@ int main()
 	VAO BlocksUpperVAO;
 	BlocksUpperVAO.Bind();
 
-	VBO BlocksUpperVBO(testChunk.chunks.at(0).facesVertices[4], sizeof(testChunk.chunks.at(0).facesVertices[4]));
-	EBO BlocksUpperEBO(testChunk.chunks.at(0).facesIndices, sizeof(testChunk.chunks.at(0).facesIndices));
+	VBO BlocksUpperVBO(testChunk.ChunkVertices[4], sizeof(testChunk.ChunkVertices[4]));
+	EBO BlocksUpperEBO(testChunk.ChunkIndices, sizeof(testChunk.ChunkIndices));
 	BlocksUpperVAO.LinkAttrib(BlocksUpperVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
 	BlocksUpperVAO.LinkAttrib(BlocksUpperVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	BlocksUpperVAO.Unbind();
@@ -528,8 +422,8 @@ int main()
 	VAO BlocksLowerVAO;
 	BlocksLowerVAO.Bind();
 
-	VBO BlocksLowerVBO(testChunk.chunks.at(0).facesVertices[5], sizeof(testChunk.chunks.at(0).facesVertices[5]));
-	EBO BlocksLowerEBO(testChunk.chunks.at(0).facesIndices, sizeof(testChunk.chunks.at(0).facesIndices));
+	VBO BlocksLowerVBO(testChunk.ChunkVertices[5], sizeof(testChunk.ChunkVertices[5]));
+	EBO BlocksLowerEBO(testChunk.ChunkIndices, sizeof(testChunk.ChunkIndices));
 	BlocksLowerVAO.LinkAttrib(BlocksLowerVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
 	BlocksLowerVAO.LinkAttrib(BlocksLowerVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
 	BlocksLowerVAO.Unbind();
@@ -538,14 +432,51 @@ int main()
 
 
 	std::stringstream cameraPosition;
+	//std::stringstream FPS;
 
 	
-	
+	double currentFrame;
+
+	VAO vao[8] = {
+		BlocksFrontVAO ,
+		BlocksBackVAO,
+		BlocksUpperVAO,
+		BlocksLowerVAO,
+		BlocksLeftVAO,
+		BlocksRightVAO,
+		skyVAO,
+		planeVao 
+	};
+
+	Texture2D textures[4] = { 
+		grass,
+		dirt,
+		texture,
+		skyTexture };
+
+	renderer.ShouldClose = glfwWindowShouldClose(renderer.window);
+
+	std::thread loadBlocks(ChunkTest::Chunk::thread, &testChunk, &camera);
+
+	std::thread loadChunks(ChunkTest::Chunk::ChunkThread, &testChunk, &camera);
+
+	std::thread playerThread(Physics::Player::checkCurrentChunk, &testChunk, &camera);
+
+	std::thread processInputThread(Physics::Player::Process, &testChunk, &camera);
+
 
 	// Main while loop
 	while (!glfwWindowShouldClose(renderer.window))
 	{
 		processInput(renderer.window, &viewport, &shader, &mv);
+
+
+		
+		currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+		counter++;
+
 
 		if (renderer.screenChanged && renderer.isFullScreen == false)
 		{
@@ -556,24 +487,19 @@ int main()
 		else if (renderer.screenChanged && renderer.isFullScreen == true)
 		{
 			renderer.isFullScreen = false;
-			renderer.SetWindowWindowed(viewport, SCR_WIDTH, SCR_HEIGHT);
+			renderer.SetWindowWindowed(viewport, renderer.SCR_Width, renderer.SCR_Height);
 			renderer.screenChanged = false;
 		}
-		float currentFrame = glfwGetTime();
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
 
 		// Specify the color of the background
 		// Clean the back buffer and assign the new color to it
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
 
-		
+
+
 
 		// Activates the shader program
-		/*texture.Activate(0);
-		texture1.Activate(1);*/
 		shader.Avtivate();
 
 		camera.SetPerspective(camera.fov, renderer.Width, renderer.Height, 0.1f, 500.0f);
@@ -583,267 +509,56 @@ int main()
 
 		shader.setMat4("projection", camera.projection);
 		shader.setMat4("view", camera.view);
-		//// render boxes
-		//vao1.Bind();
-		//for (unsigned int i = 0; i < 20; i++)
-		//{
-		//	glm::mat4 model = glm::mat4(1.0f);
-		//	model = glm::translate(model, cubePositions[i]);
-		//	float angle = 20.0f * i;
-		//	model = glm::rotate(model, (float)glfwGetTime() , glm::vec3(1.0, 0.3f, 0.5f));
-		//	shader.setMat4("model", model);
 
-		//	//if (i % 2 == 0)
-		//	//{
-		//	//	texture.Bind();
-		//	//}
-		//	//else
-		//	//{
-		//	//	texture1.Bind();
-		//	//}
 
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 0, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 6, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 12, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 18, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 24, 6);
-		//	grass.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 30, 6);
-		//	//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-		//}
-
-		////std::cout << "X:" << camera.Position.x << ",Y:" << camera.Position.y << ",Z:" << camera.Position.z << std::endl;
-
-		//for (unsigned int i = 0; i < 109; i++)
-		//{
-		//	glm::mat4 model = glm::mat4(1.0f);
-		//	model = glm::translate(model, plane[i]);
-		//	float angle = 20.0f * i;
-		//	//model = glm::rotate(model, (float)45, glm::vec3(1.0, 0.3f, 0.5f));
-		//	shader.setMat4("model", model);
-
-		//	//if (i % 2 == 0)
-		//	//{
-		//	//	texture.Bind();
-		//	//}
-		//	//else
-		//	//{
-		//	//	texture1.Bind();
-		//	//}
-
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 0, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 6, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 12, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 18, 6);
-		//	dirt.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 24, 6);
-		//	grass.Bind();
-		//	glDrawArrays(GL_TRIANGLES, 30, 6);
-		//}
-
-		
-
-		//vao1.Unbind();
-
-		/*std::thread groundThread(groundtest, &shader, &vao1);
-		groundThread.join();*/
-
-		//for (float i = -50; i <= 50; i++)
-		//{
-		//	for (float j = -50; j <= 50; j++)
-		//	{
-		//		vao1.Bind();
-		//		shader.Avtivate();
-		//		glm::mat4 model = glm::mat4(1.0f);
-		//		model = glm::translate(model, glm::vec3(i, 0.0, j));
-
-		//		shader.setMat4("model", model);
-		//		shader.setMat4("Chunkmodel", 1.0f);
-
-		//		dirt.Bind();
-		//		glDrawArrays(GL_TRIANGLES, 0, 6);
-		//		dirt.Bind();
-		//		glDrawArrays(GL_TRIANGLES, 6, 6);
-		//		dirt.Bind();
-		//		glDrawArrays(GL_TRIANGLES, 12, 6);
-		//		dirt.Bind();
-		//		glDrawArrays(GL_TRIANGLES, 18, 6);
-		//		dirt.Bind();
-		//		glDrawArrays(GL_TRIANGLES, 24, 6);
-		//		grass.Bind();
-		//		glDrawArrays(GL_TRIANGLES, 30, 6);
-		//		//glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-
-		//		vao1.Unbind();
-		//	}
-		//}
-		for (unsigned int c = 0; c < testChunk.chunks.size(); c++)
+		for (unsigned int c = 0; c < testChunk.loadedChunks.size(); c++)
 		{
-			ChunkTest::chunk_t* ck = &testChunk.chunks.at(c);
-			ChunkTest::block* b;
-			for (unsigned int i = 0; i < ck->blocks.size(); i++)
+			ChunkTest::chunk_t* ck = testChunk.loadedChunks.at(c);
+			ChunkTest::block* bk;
+
+			if (
+				(ck->Position.x < camera.Position.x + 16 && ck->Position.x > camera.Position.x - 16) &&
+				(ck->Position.z < camera.Position.z + 16 && ck->Position.z > camera.Position.z - 16)
+				)
 			{
-				b = &ck->blocks.at(i);
-				shader.Avtivate();
-
-				glm::mat4 model = glm::mat4(1.0f);
-				glm::mat4 Chunkmodel = glm::mat4(1.0f);
-				Chunkmodel = glm::translate(Chunkmodel, ck->Position);
-				model = glm::translate(model, b->Position);
-				shader.setMat4("model", model);
-				shader.setMat4("ChunkModel", Chunkmodel);
-
-
-				if (
-					(camera.Position.x < ck->Position.x + 8) && (camera.Position.x > ck->Position.x - 8) &&
-					(camera.Position.z < ck->Position.z + 8) && (camera.Position.z > ck->Position.z - 8)
-					)
+				for (unsigned int b = 0; b < ck->renderedBlocks.size(); b++)
 				{
-					std::thread CheckBlocks(ChunkTest::Chunk::checkSolidBlocks,b,ck);
-					CheckBlocks.join();
-					// Thread
-					//testChunk.checkSolidBlocks(b, ck);
+					bk = ck->renderedBlocks.at(b);
+					shader.setMat4("model", bk->model);
+					shader.setMat4("ChunkModel", bk->chunkModel);
+
+					for (unsigned int i = 0; i < 6; i++)
+					{
+						if (bk->renderFaces[i])
+						{
+							vao[i].Bind();
+
+							if (bk->type == ChunkTest::blockTypes::GRASS)
+							{
+								textures[0].Bind();
+							}
+							else if (bk->type == ChunkTest::blockTypes::DIRT)
+							{
+								textures[1].Bind();
+							}
+							else
+							{
+								textures[2].Bind();
+							}
+
+							glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+							vao[i].Unbind();
+						}
+					}
+
 				}
-				//testChunk.checkSolidBlocks(b, ck);
-				if (b->renderFaces[0])
-				{
-					BlocksFrontVAO.Bind();
-
-					if (b->type == ChunkTest::blockTypes::GRASS)
-					{
-						grass.Bind();
-					}
-					else if (b->type == ChunkTest::blockTypes::DIRT)
-					{
-						dirt.Bind();
-					}
-					else
-					{
-						texture.Bind();
-					}
-
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-					BlocksFrontVAO.Unbind();
-				}
-				if (b->renderFaces[1])
-				{
-					BlocksBackVAO.Bind();
-					
-					if (b->type == ChunkTest::blockTypes::GRASS)
-					{
-						grass.Bind();
-					}
-					else if (b->type == ChunkTest::blockTypes::DIRT)
-					{
-						dirt.Bind();
-					}
-					else
-					{
-						texture.Bind();
-					}
-
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-					BlocksBackVAO.Unbind();
-				}
-				if (b->renderFaces[2])
-				{
-					BlocksUpperVAO.Bind();
-
-					if (b->type == ChunkTest::blockTypes::GRASS)
-					{
-						grass.Bind();
-					}
-					else if (b->type == ChunkTest::blockTypes::DIRT)
-					{
-						dirt.Bind();
-					}
-					else
-					{
-						texture.Bind();
-					}
-
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-					BlocksUpperVAO.Unbind();
-				}
-				if (b->renderFaces[3])
-				{
-					BlocksLowerVAO.Bind();
-
-					if (b->type == ChunkTest::blockTypes::GRASS)
-					{
-						grass.Bind();
-					}
-					else if (b->type == ChunkTest::blockTypes::DIRT)
-					{
-						dirt.Bind();
-					}
-					else
-					{
-						texture.Bind();
-					}
-
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-					BlocksLowerVAO.Unbind();
-				}
-				if (b->renderFaces[4])
-				{
-					BlocksLeftVAO.Bind();
-
-					if (b->type == ChunkTest::blockTypes::GRASS)
-					{
-						grass.Bind();
-					}
-					else if (b->type == ChunkTest::blockTypes::DIRT)
-					{
-						dirt.Bind();
-					}
-					else
-					{
-						texture.Bind();
-					}
-
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-					BlocksLeftVAO.Unbind();
-				}
-				if (b->renderFaces[5])
-				{
-					BlocksRightVAO.Bind();
-
-					if (b->type == ChunkTest::blockTypes::GRASS)
-					{
-						grass.Bind();
-					}
-					else if (b->type == ChunkTest::blockTypes::DIRT)
-					{
-						dirt.Bind();
-					}
-					else
-					{
-						texture.Bind();
-					}
-
-					glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-					BlocksRightVAO.Unbind();
-				}
-					
-				//glDrawElements(GL_TRIANGLES,36,GL_UNSIGNED_INT,0);
-
 			}
 		}
 
 
 		for (int i = 0; i <= 4; i++)
 		{
-			skyVAO.Bind();
+			vao[6].Bind();
 			shader.Avtivate();
 			glm::mat4 model = glm::mat4(1.0f);
 
@@ -876,37 +591,53 @@ int main()
 			//model = glm::rotate(model, (float)90 * i, glm::vec3(0.0, 1.0f, 1.0f));
 
 			shader.setMat4("model", model);
-			shader.setMat4("Chunkmodel", 1.0f);
+			shader.setMat4("Chunkmodel", glm::mat4(1.0f));
 
-			skyTexture.Bind();
+			textures[3].Bind();
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			skyVAO.Unbind();
-			skyTexture.Unbind();
+			vao[6].Unbind();
+			textures[3].Unbind();
 		}
 
 
+		if(true)
+		{
+			glm::mat4 model = glm::mat4(1.0f);
+			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+			model = glm::rotate(model,(float)glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 1.0f));
+			vao[7].Bind();
+			shader.setMat4("model", model);
+			shader.setMat4("ChunkModel", glm::mat4(1.0f));
+			textures[2].Bind();
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			vao[7].Unbind();
+			textures[2].Unbind();
 
-		planeVao.Bind();
-		shader.setMat4("model", glm::mat4(1.0f));
-		texture.Bind();
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-		planeVao.Unbind();
-		texture.Unbind();
+			shader.setMat4("model", glm::mat4(1.0F));
+			shader.setMat4("Chunkmodel", glm::mat4(1.0f));
+		}
+		glfwSwapBuffers(renderer.window);
+
+
+		if (deltaTime >= 1.0f / 30.0)
+		{
+			FPS = (1.0f / deltaTime) * counter;
+			lastFrame = currentFrame;
+			counter = 0;
+		}
 
 		cameraPosition.str("");
 		cameraPosition.clear();
-		cameraPosition << "X:" << camera.Position.x << "Y:" << camera.Position.y << "Z:" << camera.Position.z;
-		renderer.setWindowTitle(cameraPosition.str());
-
-
-
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		// Swap the back buffer with the front buffer
-		glfwSwapBuffers(renderer.window);
+		cameraPosition << "X:" << camera.Position.x << "Y:" << camera.Position.y << "Z:" << camera.Position.z
+			<< "/FPS:" << FPS << "/" << "X:" << camera.Front.x << "Y:" << camera.Front.y << "Z:" << camera.Front.z/*(1.0f / deltaTime)*counter*/;
+		renderer.setWindowTitle(cameraPosition.str().c_str());
 
 		// Take care of all GLFW events
 		glfwPollEvents();
+	}
+	if (glfwWindowShouldClose(renderer.window))
+	{
+		renderer.ShouldClose = true;
 	}
 
 	vao1.Delete();
@@ -976,17 +707,30 @@ void processInput(
 	GLFWwindow* window, Viewport* viewport, Shader* shader, float* mv
 )
 {
-
-	
-
 	const float cameraSpeed = 1;
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		renderer.ShouldClose = true;
 		glfwSetWindowShouldClose(window, true);
+	}
+	
+	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
+	{
+		camera.placedBlock = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+	{
+		camera.currentBlock = ChunkTest::blockTypes::GRASS;
+	}
+	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
+	{
+		camera.currentBlock = ChunkTest::blockTypes::DIRT;
+	}
 
 	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
 	{
-		if (*mv >= 1.0) 
+		if (*mv >= 1.0)
 		{
 			*mv = 1.0f;
 		}
@@ -1014,7 +758,7 @@ void processInput(
 	{
 		renderer.screenChanged = true;
 	}
-	
+
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 		camera.ProcessKeyboard(FORWARD, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -1042,9 +786,10 @@ void processInput(
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
 	{
 		camera.MovementSpeed = 15.0f;
-	}else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
+	}
+	else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_RELEASE)
 	{
-			camera.MovementSpeed = 10.0f;
+		camera.MovementSpeed = 10.0f;
 	}
 }
 

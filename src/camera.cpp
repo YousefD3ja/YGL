@@ -12,6 +12,8 @@ Camera::Camera(glm::vec3 position)
 	fov = ZOOM;
 	Front = glm::vec3(0.0f, 0.0f, -1.0f);
 	Hight = position.y;
+	currentBlock = ChunkTest::blockTypes::DIRT;
+	currentChunk = nullptr;
 	updateCameraVectors();
 }
 
@@ -20,9 +22,9 @@ void Camera::setCameraView()
 	view = glm::lookAt(Position, Position + Front, Up);
 }
 
-void Camera::SetPerspective(float angle, float screenWidth, float screenHeight, float near, float far)
+void Camera::SetPerspective(float angle, float screenWidth, float screenHeight, float nearf, float farf)
 {
-	projection = glm::perspective(glm::radians(angle), screenWidth / screenHeight, near, far);
+	projection = glm::perspective(glm::radians(angle), screenWidth / screenHeight, nearf, farf);
 }
 
 void Camera::updateCameraVectors()
@@ -54,6 +56,7 @@ void Camera::ProcessKeyboard(cameraMovement direction, float deltaTime)
 	if (direction == DOWN)
 		Hight = Position.y - 10 * deltaTime;
 	Position.y = Hight;
+
 }
 
 void Camera::ProcessCameraPos()
