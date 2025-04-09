@@ -14,6 +14,7 @@ namespace Physics
 
 		static void Process(ChunkTest::Chunk* chunkList, Camera* player);
 
+		static void ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* player);
 	};
 }
 #endif

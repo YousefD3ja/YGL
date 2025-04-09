@@ -13,6 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <camera.h>
+#include <algorithm>
 
 class Camera;
 
@@ -25,6 +26,7 @@ namespace ChunkTest
 	{
 		GRASS,
 		DIRT,
+		WOOD,
 	};
 
 	class block
@@ -49,6 +51,7 @@ namespace ChunkTest
 	typedef struct chunk
 	{
 		unsigned int ID;
+		unsigned int Priority;
 		glm::vec3 Position;
 		std::vector<block> blocks;
 		std::vector<block*> renderedBlocks;
@@ -64,26 +67,35 @@ namespace ChunkTest
 		void addChunk();
 		void addChunkList(int count);
 
-		static void setBlock(chunk_t& _chunk, blockTypes type, glm::vec3 position, bool IsSolid);
-
-		void loadBlocks();
-
-		void loadChunk(chunk_t& chunk);
+		static void setBlock(chunk_t* _chunk, blockTypes type, glm::vec3 position, bool IsSolid);
 
 		static void checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, Camera* player);
 
-		static void thread(Chunk* testChunk, Camera* camera);
+		static void checkThread(Chunk* testChunk, Camera* player);
 
-		static void checkThread(Chunk* testChunk, Camera* camera);
-
-		static void checkChunkThread(chunk_t* Chunk, Camera* player);
+		static void checkChunkThread(Chunk* Chunk, Camera* player);
 
 		static void ChunkThread(Chunk* chunkList, Camera* camera);
+
+		static void ChenkPriorityThread(Chunk* chunkList, Camera* player);
+
+		static void SortingThread(Chunk* chunkList, Camera* player);
+
 		
 
 		std::vector<chunk_t> chunks;
 
+		bool PriorityChecked;
+
+		bool Rendered;
+
+		bool loadedUpdated;
+		std::vector<chunk_t*> tempLoaded;
 		std::vector<chunk_t*> loadedChunks;
+
+		std::vector<chunk_t*> tempV;
+		bool SortedUpdated;
+		std::vector<chunk_t*> sortedChunks;
 
 		float ChunkVertices[6][5 * 4] = {
 			{

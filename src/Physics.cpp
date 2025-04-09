@@ -20,37 +20,48 @@ void Physics::Player::checkCurrentChunk(ChunkTest::Chunk* chunkList, Camera* pla
 
 void Physics::Player::placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTypes type, Camera* player)
 {
-
 	ChunkTest::chunk_t* chunk = nullptr;
 
-	glm::vec3 blockPos;
-	blockPos.x = cos(glm::radians(player->Yaw)) * cos(glm::radians(player->Pitch));
-	blockPos.y = sin(glm::radians(player->Pitch));
-	blockPos.z = sin(glm::radians(player->Yaw)) * cos(glm::radians(player->Pitch));
-
-	glm::mat4 model = glm::mat4(1.0f);
-
-	for (unsigned int c = 0; c < chunkList->chunks.size(); c++)
+	for (unsigned int c = 0; c < chunkList->sortedChunks.size(); c++)
 	{
-		ChunkTest::chunk_t* ck = &chunkList->chunks.at(c);
+		ChunkTest::chunk_t* ck = chunkList->sortedChunks.at(c);
 		if (
-			((blockPos.x < ck->Position.x + 8) && (blockPos.x > ck->Position.x - 8)) &&
-			((blockPos.z < ck->Position.z + 8) && (blockPos.z > ck->Position.z - 8))
+			((player->placeableBlock.x <= ck->Position.x + 8) && (player->placeableBlock.x >= ck->Position.x - 8)) &&
+			((player->placeableBlock.z <= ck->Position.z + 8) && (player->placeableBlock.z >= ck->Position.z - 8))
 			)
 		{
-			//model = glm::translate(model, ck->Position);
 			chunk = ck;
+			break;
 		}
 	}
 
-	glm::vec3 position = player->Position + blockPos;
+	player->placeableBlock.x = (int)player->placeableBlock.x;
+	player->placeableBlock.y = (int)player->placeableBlock.y;
+	player->placeableBlock.z = (int)player->placeableBlock.z;
 
-	std::cout << "BlockPos: " << position.x << "," << position.y << "," << position.z << std::endl;
+	std::cout << "BlockPos: " << player->placeableBlock.x << "," << player->placeableBlock.y << "," << player->placeableBlock.z << std::endl;
 
-	if(chunk != nullptr)
+	if (chunk != nullptr)
 	{
-		ChunkTest::Chunk::setBlock(*chunk, type, player->Position + glm::normalize(blockPos), true);
+
+		for (auto b : chunk->blocks)
+		{
+			if(player->Position == b.Position)
+			{
+				if (player->Position.x > player->Front.x) player->placeableBlock.x = player->Position.x + 1;
+				if (player->Position.y > player->Front.y) player->placeableBlock.y = player->Position.y + 1;
+				if (player->Position.z > player->Front.z) player->placeableBlock.z = player->Position.z + 1;
+
+				if (player->Position.x < player->Front.x) player->placeableBlock.x = player->Position.x - 1;
+				if (player->Position.y < player->Front.y) player->placeableBlock.y = player->Position.y - 1;
+				if (player->Position.z < player->Front.z) player->placeableBlock.z = player->Position.z - 1;
+			}
+		}
+
+		ChunkTest::Chunk::setBlock(chunk, type, player->placeableBlock, true);
 	}
+
+	Sleep(200);
 }
 
 void Physics::Player::Process(ChunkTest::Chunk* chunkList, Camera* player)
@@ -63,5 +74,36 @@ void Physics::Player::Process(ChunkTest::Chunk* chunkList, Camera* player)
 
 			player->placedBlock = false;
 		}
+	}
+}
+
+void Physics::Player::ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* player)
+{
+	ChunkTest::chunk_t* ck = nullptr;
+	ChunkTest::block* bk = nullptr;
+	while (true)
+	{
+		player->placeableBlock.x = player->Position.x + player->Front.x * player->range;
+		player->placeableBlock.y = player->Position.y + player->Front.y * player->range;
+		player->placeableBlock.z = player->Position.z + player->Front.z * player->range;
+
+		/*player->placeableBlock.x = (int)player->placeableBlock.x;
+		player->placeableBlock.y = (int)player->placeableBlock.y;
+		player->placeableBlock.z = (int)player->placeableBlock.z;*/
+
+		/*for (unsigned int b = 0; b < player->currentChunk->blocks.size(); b++)
+		{
+			bk = &player->currentChunk->blocks.at(b);
+			if (player->Position == bk->Position)
+			{
+				if (player->Position.x > player->Front.x) player->placeableBlock.x = player->Position.x + 1;
+				if (player->Position.y > player->Front.y) player->placeableBlock.y = player->Position.y + 1;
+				if (player->Position.z > player->Front.z) player->placeableBlock.z = player->Position.z + 1;
+
+				if (player->Position.x < player->Front.x) player->placeableBlock.x = player->Position.x - 1;
+				if (player->Position.y < player->Front.y) player->placeableBlock.y = player->Position.y - 1;
+				if (player->Position.z < player->Front.z) player->placeableBlock.z = player->Position.z - 1;
+			}
+		}*/
 	}
 }

@@ -41,7 +41,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
-void processInput(GLFWwindow* window, Viewport* viewport, Shader* shader, float* mv);
+void processInput(GLFWwindow* window, Viewport* viewport, Shader* shader);
 
 void groundtest(Shader* shader, VAO* vao);
 
@@ -53,6 +53,7 @@ Camera camera(glm::vec3(0.0f,5.0f,0.0f));
 
 Texture2D grass("res/textures/GrassBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D dirt("res/textures/DirtBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+Texture2D wood("res/textures/woodBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
 Texture2D skyTexture("res/textures/sky.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
@@ -309,8 +310,6 @@ int main()
 	shader.Avtivate();
 	shader.setInt("tex0", 0);
 
-	float mv = 0;
-
 	camera.fov = 120.0f;
 
 	glEnable(GL_DEPTH_TEST);
@@ -347,11 +346,11 @@ int main()
 				{
 					if(j > 3)
 					{
-						testChunk.setBlock(testChunk.chunks.at(c), ChunkTest::blockTypes::GRASS, glm::vec3(i, j, k), true);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::GRASS, glm::vec3(i, j, k), true);
 					}
 					else
 					{
-						testChunk.setBlock(testChunk.chunks.at(c), ChunkTest::blockTypes::DIRT, glm::vec3(i, j, k), true);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::DIRT, glm::vec3(i, j, k), true);
 					}
 				}
 			}
@@ -448,15 +447,13 @@ int main()
 		planeVao 
 	};
 
-	Texture2D textures[4] = { 
+	Texture2D textures[5] = { 
 		grass,
 		dirt,
 		texture,
-		skyTexture };
-
-	renderer.ShouldClose = glfwWindowShouldClose(renderer.window);
-
-	std::thread loadBlocks(ChunkTest::Chunk::thread, &testChunk, &camera);
+		skyTexture,
+		wood
+	};
 
 	std::thread loadChunks(ChunkTest::Chunk::ChunkThread, &testChunk, &camera);
 
@@ -464,20 +461,35 @@ int main()
 
 	std::thread processInputThread(Physics::Player::Process, &testChunk, &camera);
 
+	std::thread CheckChunks(ChunkTest::Chunk::ChenkPriorityThread, &testChunk, &camera);
+
+	std::thread SortingThread(ChunkTest::Chunk::SortingThread, &testChunk, &camera);
+
+	std::thread loadBlocks(ChunkTest::Chunk::checkChunkThread, &testChunk, &camera);
+
+	std::thread processPlaceablesThread(Physics::Player::ProcessPlaceables, &testChunk, &camera);
+
+	unsigned int renderedCounter = 0;
+
+	std::vector<ChunkTest::chunk_t*> ChunkList;
+
 
 	// Main while loop
 	while (!glfwWindowShouldClose(renderer.window))
 	{
-		processInput(renderer.window, &viewport, &shader, &mv);
-
-
-		
 		currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		//lastFrame = currentFrame;
 		counter++;
 
+		FPS = (1.0f / deltaTime);
+		lastFrame = currentFrame;
+		//counter = 0;
 
+		processInput(renderer.window, &viewport, &shader);
+
+		renderedCounter++;
+		
 		if (renderer.screenChanged && renderer.isFullScreen == false)
 		{
 			renderer.isFullScreen = true;
@@ -496,9 +508,6 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-
-
 		// Activates the shader program
 		shader.Avtivate();
 
@@ -510,53 +519,56 @@ int main()
 		shader.setMat4("projection", camera.projection);
 		shader.setMat4("view", camera.view);
 
-
-		for (unsigned int c = 0; c < testChunk.loadedChunks.size(); c++)
+		if (testChunk.SortedUpdated)
 		{
-			ChunkTest::chunk_t* ck = testChunk.loadedChunks.at(c);
-			ChunkTest::block* bk;
+			ChunkList = testChunk.sortedChunks;
+			testChunk.SortedUpdated = false;
+			renderedCounter = 0;
+		}
 
-			if (
-				(ck->Position.x < camera.Position.x + 16 && ck->Position.x > camera.Position.x - 16) &&
-				(ck->Position.z < camera.Position.z + 16 && ck->Position.z > camera.Position.z - 16)
-				)
+		for (ChunkTest::chunk_t* ck : ChunkList)
+		{
+			for (ChunkTest::block* bk : ck->renderedBlocks)
 			{
-				for (unsigned int b = 0; b < ck->renderedBlocks.size(); b++)
+				shader.setMat4("model", bk->model);
+				shader.setMat4("ChunkModel", bk->chunkModel);
+
+				for (unsigned int i = 0; i < 6; i++)
 				{
-					bk = ck->renderedBlocks.at(b);
-					shader.setMat4("model", bk->model);
-					shader.setMat4("ChunkModel", bk->chunkModel);
-
-					for (unsigned int i = 0; i < 6; i++)
+					if (bk->renderFaces[i])
 					{
-						if (bk->renderFaces[i])
+						vao[i].Bind();
+
+						if (bk->type == ChunkTest::blockTypes::GRASS)
 						{
-							vao[i].Bind();
-
-							if (bk->type == ChunkTest::blockTypes::GRASS)
-							{
-								textures[0].Bind();
-							}
-							else if (bk->type == ChunkTest::blockTypes::DIRT)
-							{
-								textures[1].Bind();
-							}
-							else
-							{
-								textures[2].Bind();
-							}
-
-							glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-							vao[i].Unbind();
+							textures[0].Bind();
 						}
-					}
+						else if (bk->type == ChunkTest::blockTypes::DIRT)
+						{
+							textures[1].Bind();
+						}
+						else if (bk->type == ChunkTest::blockTypes::WOOD)
+						{
+							textures[4].Bind();
+						}
+						else
+						{
+							textures[2].Bind();
+						}
 
+						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+						vao[i].Unbind();
+					}
 				}
+
+				shader.setMat4("model", glm::mat4(1.0));
+				shader.setMat4("ChunkModel", glm::mat4(1.0));
+
 			}
 		}
 
 
-		for (int i = 0; i <= 4; i++)
+		for (int i = 0; i < 5; i++)
 		{
 			vao[6].Bind();
 			shader.Avtivate();
@@ -597,47 +609,58 @@ int main()
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			vao[6].Unbind();
 			textures[3].Unbind();
+
+			shader.setMat4("model", glm::mat4(1.0));
+			shader.setMat4("ChunkModel", glm::mat4(1.0));
 		}
 
 
-		if(true)
+		/* Placeable Block */
+
+		if (true)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-			model = glm::rotate(model,(float)glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 1.0f));
-			vao[7].Bind();
-			shader.setMat4("model", model);
-			shader.setMat4("ChunkModel", glm::mat4(1.0f));
-			textures[2].Bind();
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			vao[7].Unbind();
-			textures[2].Unbind();
+			glm::mat4 ChunkModel = glm::mat4(1.0f);
 
-			shader.setMat4("model", glm::mat4(1.0F));
-			shader.setMat4("Chunkmodel", glm::mat4(1.0f));
+			glm::vec3 pos = glm::vec3(1.0f);
+			pos.x = (int)camera.placeableBlock.x;
+			pos.y = (int)camera.placeableBlock.y;
+			pos.z = (int)camera.placeableBlock.z;
+
+			model = glm::translate(model, pos);
+			ChunkModel = glm::translate(ChunkModel, camera.currentChunk->Position);
+
+			for (unsigned int i = 0; i < 6; i++)
+			{
+				shader.setMat4("model", glm::mat4(1.0));
+				shader.setMat4("ChunkModel", glm::mat4(1.0));
+				shader.setMat4("model", model);
+				shader.setMat4("ChunkModel", ChunkModel);
+				vao[i].Bind();
+				textures[2].Bind();
+				glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, 0);
+				vao[i].Unbind();
+
+			}
+			shader.setMat4("model", glm::mat4(1.0));
+
 		}
+
+		///////////////////////
+
 		glfwSwapBuffers(renderer.window);
 
 
-		if (deltaTime >= 1.0f / 30.0)
-		{
-			FPS = (1.0f / deltaTime) * counter;
-			lastFrame = currentFrame;
-			counter = 0;
-		}
+		
 
 		cameraPosition.str("");
 		cameraPosition.clear();
 		cameraPosition << "X:" << camera.Position.x << "Y:" << camera.Position.y << "Z:" << camera.Position.z
-			<< "/FPS:" << FPS << "/" << "X:" << camera.Front.x << "Y:" << camera.Front.y << "Z:" << camera.Front.z/*(1.0f / deltaTime)*counter*/;
+			<< "/FPS:" << (int)FPS << "/" << "X:" << camera.Front.x << "Y:" << camera.Front.y << "Z:" << camera.Front.z/*(1.0f / deltaTime)*counter*/;
 		renderer.setWindowTitle(cameraPosition.str().c_str());
 
 		// Take care of all GLFW events
 		glfwPollEvents();
-	}
-	if (glfwWindowShouldClose(renderer.window))
-	{
-		renderer.ShouldClose = true;
 	}
 
 	vao1.Delete();
@@ -692,6 +715,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 
 	camera.Front = glm::normalize(direction);
+	camera.uFront = direction;
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -701,13 +725,16 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 		camera.fov = 1.0f;
 	if (camera.fov > 120.0f)
 		camera.fov = 120.0f;
+
+	//camera.range += (int)yoffset;
+
 }
 
 void processInput(
-	GLFWwindow* window, Viewport* viewport, Shader* shader, float* mv
+	GLFWwindow* window, Viewport* viewport, Shader* shader
 )
 {
-	const float cameraSpeed = 1;
+	const float cameraSpeed = 2;
 
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 	{
@@ -727,31 +754,9 @@ void processInput(
 	{
 		camera.currentBlock = ChunkTest::blockTypes::DIRT;
 	}
-
-	if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
 	{
-		if (*mv >= 1.0)
-		{
-			*mv = 1.0f;
-		}
-		else
-		{
-			shader->setFloat("mixValue", *mv + 0.01f);
-			*mv += 0.01f;
-		}
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
-	{
-		if (*mv <= 0.0)
-		{
-			*mv = 0.0f;
-		}
-		else
-		{
-			shader->setFloat("mixValue", *mv - 0.01f);
-			*mv -= 0.01f;
-		}
+		camera.currentBlock = ChunkTest::blockTypes::WOOD;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)

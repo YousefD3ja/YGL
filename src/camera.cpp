@@ -5,6 +5,7 @@ Camera::Camera(glm::vec3 position)
 {
 	Position = position;
 	WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+	placeableBlock = glm::vec3(0.0f, 0.0f, 0.0f);
 	Yaw = YAW;
 	Pitch = PITCH;
 	MovementSpeed = SPEED;
@@ -34,10 +35,14 @@ void Camera::updateCameraVectors()
 	front.y = sin(glm::radians(Pitch));
 	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 	Front = glm::normalize(front);
+
+	uFront = front;
+
 	// also re-calculate the Right and Up vector
 	Right = glm::normalize(glm::cross(Front, WorldUp));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 	Up = glm::normalize(glm::cross(Right, Front));
 	Position.y = Hight;
+
 }
 
 void Camera::ProcessKeyboard(cameraMovement direction, float deltaTime) 

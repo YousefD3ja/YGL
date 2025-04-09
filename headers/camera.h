@@ -66,6 +66,13 @@ class Camera
 		glm::vec3 Up;
 
 		glm::vec3 Front;
+		glm::vec3 uFront;
+
+		glm::vec3 FrontBlock;
+
+		glm::vec3 placeableBlock;
+
+		int range = 2;
 
 		glm::vec3 direction;
 
