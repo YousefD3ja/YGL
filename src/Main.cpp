@@ -74,9 +74,6 @@ int main()
 
 	glfwSetScrollCallback(renderer.window, scroll_callback);
 
-	Texture2D texture("res/textures/download.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR);
-	Texture2D texture1("res/textures/test.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_LINEAR);
-
 
 
 	/*float vertices[] =
@@ -448,10 +445,9 @@ int main()
 		planeVao 
 	};
 
-	Texture2D textures[6] = { 
+	Texture2D textures[5] = { 
 		grass,
 		dirt,
-		texture,
 		skyTexture,
 		wood,
 		stone,
@@ -551,11 +547,11 @@ int main()
 						}
 						else if (bk->type == ChunkTest::blockTypes::WOOD)
 						{
-							textures[4].Bind();
+							textures[3].Bind();
 						}
 						else if (bk->type == ChunkTest::blockTypes::STONE)
 						{
-							textures[5].Bind();
+							textures[4].Bind();
 						}
 						else
 						{
@@ -611,10 +607,10 @@ int main()
 			shader.setMat4("model", model);
 			shader.setMat4("Chunkmodel", glm::mat4(1.0f));
 
-			textures[3].Bind();
+			textures[2].Bind();
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			vao[6].Unbind();
-			textures[3].Unbind();
+			textures[2].Unbind();
 
 			shader.setMat4("model", glm::mat4(1.0));
 			shader.setMat4("ChunkModel", glm::mat4(1.0));
@@ -671,8 +667,6 @@ int main()
 
 	vao1.Delete();
 	vbo2.Delete();
-	//ebo1.Delete();
-	texture.Delete();
 	shader.DeleteShader();
 
 	// Delete window before ending the program
