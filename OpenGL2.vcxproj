@@ -164,6 +164,7 @@
     <ClCompile Include="src\Ymath.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="res\default.shader" />
   </ItemGroup>
   <ItemGroup>

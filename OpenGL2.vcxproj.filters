@@ -53,6 +53,7 @@
     <None Include="res\default.shader">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\sdl2lp\sdl2LP\src\images\background.png">

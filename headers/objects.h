@@ -27,6 +27,7 @@ namespace ChunkTest
 		GRASS,
 		DIRT,
 		WOOD,
+		STONE,
 	};
 
 	class block

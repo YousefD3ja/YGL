@@ -54,6 +54,7 @@ Camera camera(glm::vec3(0.0f,5.0f,0.0f));
 Texture2D grass("res/textures/GrassBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D dirt("res/textures/DirtBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D wood("res/textures/woodBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+Texture2D stone("res/textures/stoneBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
 Texture2D skyTexture("res/textures/sky.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
@@ -447,12 +448,13 @@ int main()
 		planeVao 
 	};
 
-	Texture2D textures[5] = { 
+	Texture2D textures[6] = { 
 		grass,
 		dirt,
 		texture,
 		skyTexture,
-		wood
+		wood,
+		stone,
 	};
 
 	std::thread loadChunks(ChunkTest::Chunk::ChunkThread, &testChunk, &camera);
@@ -550,6 +552,10 @@ int main()
 						else if (bk->type == ChunkTest::blockTypes::WOOD)
 						{
 							textures[4].Bind();
+						}
+						else if (bk->type == ChunkTest::blockTypes::STONE)
+						{
+							textures[5].Bind();
 						}
 						else
 						{
@@ -757,6 +763,10 @@ void processInput(
 	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
 	{
 		camera.currentBlock = ChunkTest::blockTypes::WOOD;
+	}
+	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
+	{
+		camera.currentBlock = ChunkTest::blockTypes::STONE;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)

@@ -86,24 +86,5 @@ void Physics::Player::ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* pla
 		player->placeableBlock.x = player->Position.x + player->Front.x * player->range;
 		player->placeableBlock.y = player->Position.y + player->Front.y * player->range;
 		player->placeableBlock.z = player->Position.z + player->Front.z * player->range;
-
-		/*player->placeableBlock.x = (int)player->placeableBlock.x;
-		player->placeableBlock.y = (int)player->placeableBlock.y;
-		player->placeableBlock.z = (int)player->placeableBlock.z;*/
-
-		/*for (unsigned int b = 0; b < player->currentChunk->blocks.size(); b++)
-		{
-			bk = &player->currentChunk->blocks.at(b);
-			if (player->Position == bk->Position)
-			{
-				if (player->Position.x > player->Front.x) player->placeableBlock.x = player->Position.x + 1;
-				if (player->Position.y > player->Front.y) player->placeableBlock.y = player->Position.y + 1;
-				if (player->Position.z > player->Front.z) player->placeableBlock.z = player->Position.z + 1;
-
-				if (player->Position.x < player->Front.x) player->placeableBlock.x = player->Position.x - 1;
-				if (player->Position.y < player->Front.y) player->placeableBlock.y = player->Position.y - 1;
-				if (player->Position.z < player->Front.z) player->placeableBlock.z = player->Position.z - 1;
-			}
-		}*/
 	}
 }
