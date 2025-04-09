@@ -6,6 +6,6 @@
 
 * it's not memory efficient (it will consume your memory like a black hole).
 * is uses multiple threads (some of them probably has no purpose).
-* lastly it has a lot of bugs.
+* lastly, it has a lot of bugs.
 
 
