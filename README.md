@@ -13,8 +13,8 @@
 * press "R" to remove blocks.
 * press from 1 to 4 to select a block (1:grass, 2:dirt, 3:wood, 4:stone).
 * press CTRL to move faster.
-
-have fun
+* wait for about 15~20 seconds before moveing to avoid potential bugs.
+* have fun
 
 
 # Note
