@@ -1,7 +1,7 @@
 #include <camera.h>
 
 
-Camera::Camera(glm::vec3 position)
+Camera::Camera(glm::vec3 position, Texture2D* textureList, int textureListSize)
 {
 	Position = position;
 	WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -13,8 +13,10 @@ Camera::Camera(glm::vec3 position)
 	fov = ZOOM;
 	Front = glm::vec3(0.0f, 0.0f, -1.0f);
 	Hight = position.y;
-	currentBlock = ChunkTest::blockTypes::DIRT;
+	currentBlock = ChunkTest::blockTypes::GRASS;
 	currentChunk = nullptr;
+	textures = textureList;
+	textureListSize = textureListSize;
 	updateCameraVectors();
 }
 

@@ -54,7 +54,7 @@ void ChunkTest::Chunk::addChunkList(int count)
     }
 }
 
-void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 position, bool IsSolid)
+void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 position, bool IsSolid, bool Placed)
 {
     position.x = (int)position.x;
     position.y = (int)position.y;
@@ -63,19 +63,42 @@ void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 posit
     if(chunk->blocks.size() == 0) 
     {
         block b;
-        b.ID = 0;
-        b.type = type;
-        b.Position = position;
-        b.IsSolid = IsSolid;
+        if (Placed)
+        {
+            b.ID = 0;
+            b.type = type;
+            b.Position = position;
+            b.IsSolid = IsSolid;
+        }
+        else {
+			glm::mat4 temp = glm::mat4(1.0f);
+			temp = glm::translate(temp, chunk->Position);
+            b.ID = 0;
+            b.type = type;
+            b.Position = temp * glm::vec4(position,1.0f);
+            b.IsSolid = IsSolid;
+        }
+		ChunkTest::Chunk::checkSolidBlocks(&b, chunk, &chunk->renderedBlocks, nullptr);
         chunk->blocks.push_back(b);
     }
     else 
     {
         block b;
-        b.ID = chunk->blocks.back().ID+1;
-        b.type = type;
-        b.Position = position;
-        b.IsSolid = IsSolid;
+        if (Placed)
+        {
+            b.ID = chunk->blocks.back().ID+1;
+            b.type = type;
+            b.Position = position;
+            b.IsSolid = IsSolid;
+        }
+        else {
+            glm::mat4 temp = glm::mat4(1.0f);
+            temp = glm::translate(temp, chunk->Position);
+            b.ID = chunk->blocks.back().ID+1;
+            b.type = type;
+            b.Position = temp * glm::vec4(position, 1.0f);
+            b.IsSolid = IsSolid;
+        }
         chunk->blocks.push_back(b);
     }
 
@@ -84,6 +107,12 @@ void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 posit
 void ChunkTest::Chunk::checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, Camera* player)
 {
     block* b;
+	_block->renderFaces[0] = true;
+	_block->renderFaces[1] = true;
+	_block->renderFaces[2] = true;
+	_block->renderFaces[3] = true;
+	_block->renderFaces[4] = true;
+	_block->renderFaces[5] = true;
     for (unsigned int i = 0; i < _chunk->blocks.size(); i++)
     {
         b = &_chunk->blocks.at(i);
@@ -211,7 +240,7 @@ void ChunkTest::Chunk::ChenkPriorityThread(Chunk* chunkList, Camera* player)
                 (ck->Position.z < player->Position.z + 64) && (ck->Position.z > player->Position.z - 64)
             )
             {
-                ck->Priority = 2;
+                ck->Priority = 4;
             }
             else
             {
@@ -231,20 +260,23 @@ void ChunkTest::Chunk::SortingThread(Chunk* chunkList, Camera* player)
         if(chunkList->PriorityChecked)
         {
             chunkList->PriorityChecked = false;
-            copy = chunkList->loadedChunks;
-            for (auto ck : copy)
+            if(!chunkList->SortedUpdated)
             {
-                if (ck->Priority < 2)
+                copy = chunkList->loadedChunks;
+                for (auto ck : copy)
                 {
-                    temp.push_back(ck);
+                    if (ck->Priority < 2)
+                    {
+                        temp.push_back(ck);
+                    }
                 }
+                copy.clear();
+                if (temp.size() < 0) std::cout << "temp is empty" << std::endl;
+                std::sort(temp.begin(), temp.end(), [](chunk_t* a, chunk_t* b) {return a->Priority < b->Priority; });
+                chunkList->sortedChunks = temp;
+                temp.clear();
+                chunkList->SortedUpdated = true;
             }
-            copy.clear();
-            if (temp.size() < 0) std::cout << "temp is empty" << std::endl;
-            std::sort(temp.begin(), temp.end(), [](chunk_t* a, chunk_t* b) {return a->Priority < b->Priority; });
-            chunkList->sortedChunks = temp;
-            temp.clear();
-            chunkList->SortedUpdated = true;
         }
     }
 }

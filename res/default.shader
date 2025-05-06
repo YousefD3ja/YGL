@@ -9,12 +9,11 @@ out vec2 texCoord;
 uniform	mat4 projection;
 uniform	mat4 view;
 uniform	mat4 model;
-uniform	mat4 ChunkModel;
 
 
 void main()
 {
-	gl_Position = projection * view * ChunkModel * model * vec4(aPos, 1.0f);
+	gl_Position = projection * view * model * vec4(aPos, 1.0f);
 	texCoord = vec2(aTex.x,aTex.y);
 }
 

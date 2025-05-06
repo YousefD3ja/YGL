@@ -49,16 +49,23 @@ Viewport viewport(1);
 // Initialize a Renderer object
 Renderer renderer(SCR_WIDTH, SCR_HEIGHT, "OpenGL", false, &viewport);
 
-Camera camera(glm::vec3(0.0f,5.0f,0.0f));
+
 
 Texture2D grass("res/textures/GrassBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D dirt("res/textures/DirtBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D wood("res/textures/woodBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D stone("res/textures/stoneBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
-
 Texture2D skyTexture("res/textures/sky.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
-Texture2D textures[2] = { dirt, grass };
+Texture2D textures[] = {
+	grass,
+	dirt,
+	wood,
+	stone,
+	skyTexture,
+};
+
+Camera camera(glm::vec3(0.0f,5.0f,0.0f), textures, 4);
 
 int main()
 {
@@ -344,11 +351,15 @@ int main()
 				{
 					if(j > 3)
 					{
-						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::GRASS, glm::vec3(i, j, k), true);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::GRASS, glm::vec3(i, j, k), true, false);
 					}
-					else
+					else if(j > 0 && j <= 3)
 					{
-						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::DIRT, glm::vec3(i, j, k), true);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::DIRT, glm::vec3(i, j, k), true, false);
+					}
+					else if(j <= 0)
+					{
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::STONE, glm::vec3(i, j, k), true, false);
 					}
 				}
 			}
@@ -429,7 +440,6 @@ int main()
 
 
 	std::stringstream cameraPosition;
-	//std::stringstream FPS;
 
 	
 	double currentFrame;
@@ -443,14 +453,6 @@ int main()
 		BlocksRightVAO,
 		skyVAO,
 		planeVao 
-	};
-
-	Texture2D textures[5] = { 
-		grass,
-		dirt,
-		skyTexture,
-		wood,
-		stone,
 	};
 
 	std::thread loadChunks(ChunkTest::Chunk::ChunkThread, &testChunk, &camera);
@@ -471,6 +473,7 @@ int main()
 
 	std::vector<ChunkTest::chunk_t*> ChunkList;
 
+	
 
 	// Main while loop
 	while (!glfwWindowShouldClose(renderer.window))
@@ -529,7 +532,6 @@ int main()
 			for (ChunkTest::block* bk : ck->renderedBlocks)
 			{
 				shader.setMat4("model", bk->model);
-				shader.setMat4("ChunkModel", bk->chunkModel);
 
 				for (unsigned int i = 0; i < 6; i++)
 				{
@@ -539,23 +541,23 @@ int main()
 
 						if (bk->type == ChunkTest::blockTypes::GRASS)
 						{
-							textures[0].Bind();
+							camera.textures[0].Bind();
 						}
 						else if (bk->type == ChunkTest::blockTypes::DIRT)
 						{
-							textures[1].Bind();
+							camera.textures[1].Bind();
 						}
 						else if (bk->type == ChunkTest::blockTypes::WOOD)
 						{
-							textures[3].Bind();
+							camera.textures[2].Bind();
 						}
 						else if (bk->type == ChunkTest::blockTypes::STONE)
 						{
-							textures[4].Bind();
+							camera.textures[3].Bind();
 						}
 						else
 						{
-							textures[2].Bind();
+							camera.textures[4].Bind();
 						}
 
 						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -564,11 +566,9 @@ int main()
 				}
 
 				shader.setMat4("model", glm::mat4(1.0));
-				shader.setMat4("ChunkModel", glm::mat4(1.0));
 
 			}
 		}
-
 
 		for (int i = 0; i < 5; i++)
 		{
@@ -605,15 +605,13 @@ int main()
 			//model = glm::rotate(model, (float)90 * i, glm::vec3(0.0, 1.0f, 1.0f));
 
 			shader.setMat4("model", model);
-			shader.setMat4("Chunkmodel", glm::mat4(1.0f));
 
-			textures[2].Bind();
+			skyTexture.Bind();
 			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 			vao[6].Unbind();
-			textures[2].Unbind();
+			skyTexture.Unbind();
 
 			shader.setMat4("model", glm::mat4(1.0));
-			shader.setMat4("ChunkModel", glm::mat4(1.0));
 		}
 
 
@@ -625,21 +623,37 @@ int main()
 			glm::mat4 ChunkModel = glm::mat4(1.0f);
 
 			glm::vec3 pos = glm::vec3(1.0f);
-			pos.x = (int)camera.placeableBlock.x;
-			pos.y = (int)camera.placeableBlock.y;
-			pos.z = (int)camera.placeableBlock.z;
+
+
+			pos.x = camera.placeableBlock.x;
+			pos.y = camera.placeableBlock.y;
+			pos.z = camera.placeableBlock.z;
 
 			model = glm::translate(model, pos);
-			ChunkModel = glm::translate(ChunkModel, camera.currentChunk->Position);
 
 			for (unsigned int i = 0; i < 6; i++)
 			{
 				shader.setMat4("model", glm::mat4(1.0));
-				shader.setMat4("ChunkModel", glm::mat4(1.0));
 				shader.setMat4("model", model);
-				shader.setMat4("ChunkModel", ChunkModel);
 				vao[i].Bind();
-				textures[2].Bind();
+				
+				if (camera.currentBlock == ChunkTest::blockTypes::GRASS)
+				{
+					camera.textures[0].Bind();
+				}
+				if (camera.currentBlock == ChunkTest::blockTypes::DIRT)
+				{
+					camera.textures[1].Bind();
+				}
+				if (camera.currentBlock == ChunkTest::blockTypes::WOOD)
+				{
+					camera.textures[2].Bind();
+				}
+				if (camera.currentBlock == ChunkTest::blockTypes::STONE)
+				{
+					camera.textures[3].Bind();
+				}
+				
 				glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, 0);
 				vao[i].Unbind();
 
@@ -745,6 +759,10 @@ void processInput(
 	if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS)
 	{
 		camera.placedBlock = true;
+	}
+	if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+	{
+		camera.deleteBlock = true;
 	}
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 	{

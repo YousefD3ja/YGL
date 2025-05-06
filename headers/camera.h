@@ -46,7 +46,7 @@ class Camera
 		float Hight;
 		bool isRunning;
 
-		Camera(glm::vec3 position);
+		Camera(glm::vec3 position, Texture2D* textures, int textureListSize);
 
 		// camera position
 		glm::vec3 Position;
@@ -72,7 +72,7 @@ class Camera
 
 		glm::vec3 placeableBlock;
 
-		int range = 2;
+		int range = 3;
 
 		glm::vec3 direction;
 
@@ -87,8 +87,12 @@ class Camera
 
 		bool placedBlock;
 
+		bool deleteBlock;
+
 		float fov;
 
+		Texture2D* textures;
+		int textureListSize;
 
 		void setCameraView();
 

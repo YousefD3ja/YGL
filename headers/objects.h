@@ -68,7 +68,7 @@ namespace ChunkTest
 		void addChunk();
 		void addChunkList(int count);
 
-		static void setBlock(chunk_t* _chunk, blockTypes type, glm::vec3 position, bool IsSolid);
+		static void setBlock(chunk_t* _chunk, blockTypes type, glm::vec3 position, bool IsSolid, bool Placed);
 
 		static void checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, Camera* player);
 

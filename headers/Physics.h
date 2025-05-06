@@ -12,6 +12,8 @@ namespace Physics
 
 		static void placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTypes type, Camera* player);
 
+		static void DeleteBlocks(ChunkTest::Chunk* chunkList, Camera* player);
+
 		static void Process(ChunkTest::Chunk* chunkList, Camera* player);
 
 		static void ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* player);
