@@ -46,6 +46,7 @@ void Physics::Player::placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTy
 
 			if (tempBlock->Position == player->placeableBlock)
 			{
+				tempBlock->type = type;
 				emptyPos = false;
 			}
 		}
@@ -130,8 +131,10 @@ void Physics::Player::ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* pla
 	ChunkTest::block* bk = nullptr;
 	while (true)
 	{
+		
 		player->placeableBlock.x = (int)(player->Position.x + player->Front.x * player->range);
 		player->placeableBlock.y = (int)(player->Position.y + player->Front.y * player->range);
 		player->placeableBlock.z = (int)(player->Position.z + player->Front.z * player->range);
+		Sleep(5);
 	}
 }

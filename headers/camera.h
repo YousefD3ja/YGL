@@ -104,8 +104,7 @@ class Camera
 
 		void ProcessCameraPos();
 
-
-	private:
+		private:
 		void updateCameraVectors();
 		
 

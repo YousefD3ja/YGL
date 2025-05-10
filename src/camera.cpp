@@ -5,7 +5,6 @@ Camera::Camera(glm::vec3 position, Texture2D* textureList, int textureListSize)
 {
 	Position = position;
 	WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-	placeableBlock = glm::vec3(0.0f, 0.0f, 0.0f);
 	Yaw = YAW;
 	Pitch = PITCH;
 	MovementSpeed = SPEED;
@@ -37,6 +36,8 @@ void Camera::updateCameraVectors()
 	front.y = sin(glm::radians(Pitch));
 	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 	Front = glm::normalize(front);
+
+	placeableBlock = Front;
 
 	uFront = front;
 

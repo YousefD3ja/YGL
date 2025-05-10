@@ -517,6 +517,7 @@ int main()
 
 		camera.setCameraView();
 
+
 		shader.setMat4("projection", camera.projection);
 		shader.setMat4("view", camera.view);
 
@@ -633,7 +634,6 @@ int main()
 
 			for (unsigned int i = 0; i < 6; i++)
 			{
-				shader.setMat4("model", glm::mat4(1.0));
 				shader.setMat4("model", model);
 				vao[i].Bind();
 				
@@ -685,6 +685,21 @@ int main()
 
 	// Delete window before ending the program
 	renderer.~Renderer();
+
+	// delete all treads
+	loadChunks.~thread();
+
+	playerThread.~thread();
+
+	processInputThread.~thread();
+
+	CheckChunks.~thread();
+
+	SortingThread.~thread();
+
+	loadBlocks.~thread();
+
+	processPlaceablesThread.~thread();
 
 	// Terminate GLFW before ending the program
 	glfwTerminate();
