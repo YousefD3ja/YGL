@@ -165,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
+    <None Include="res\crosshair.shader" />
     <None Include="res\default.shader" />
   </ItemGroup>
   <ItemGroup>

@@ -56,6 +56,7 @@ Texture2D dirt("res/textures/DirtBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_R
 Texture2D wood("res/textures/woodBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D stone("res/textures/stoneBlock.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 Texture2D skyTexture("res/textures/sky.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
+Texture2D CrosshairTexture("res/textures/Crosshair.png", 1, GL_TEXTURE_2D, GL_TEXTURE0, GL_RGBA, GL_UNSIGNED_BYTE, GL_NEAREST);
 
 Texture2D textures[] = {
 	grass,
@@ -63,9 +64,10 @@ Texture2D textures[] = {
 	wood,
 	stone,
 	skyTexture,
+	CrosshairTexture,
 };
 
-Camera camera(glm::vec3(0.0f,5.0f,0.0f), textures, 4);
+PlayerObject camera(glm::vec3(0.0f,5.0f,0.0f), textures, 4);
 
 int main()
 {
@@ -261,6 +263,9 @@ int main()
 	Shader::ShaderProgramSource ShadersSource;
 	Shader shader("res/default.shader", &ShadersSource);
 
+	Shader::ShaderProgramSource CrosshairShaderSource;
+	Shader Crosshairshader("res/crosshair.shader", &CrosshairShaderSource);
+
 	std::cout << ShadersSource.Vertex << std::endl;
 	std::cout << ShadersSource.Fragment << std::endl;
 
@@ -321,16 +326,18 @@ int main()
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	glFrontFace(GL_CCW);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 
 	viewport.setViewportf(0, 0.0f, 0.0f, (float)SCR_WIDTH, (float)SCR_HEIGHT);
 
 	float faceVertices[] =
 	{
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-		-0.5f, 0.5f,  0.0f, 0.0f, 1.0f,
-		 0.5f, 0.5f,  0.0f, 1.0f, 1.0f,
-		 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+		-0.01f, -0.01f, 0.0f, 0.0f, 0.0f,
+		-0.01f, 0.01f,  0.0f, 0.0f, 0.5f,
+		 0.01f, 0.01f,  0.0f, 0.5f, 0.5f,
+		 0.01f, -0.01f, 0.0f, 0.5f, 0.0f,
 	};
 
 	unsigned int faceIndices[] =
@@ -339,7 +346,7 @@ int main()
 		0,2,3
 	};
 
-	ChunkTest::Chunk testChunk(glm::vec3(0.0f, 0.0f, 0.0));
+	ChunkManager::Chunk testChunk(glm::vec3(0.0f, 0.0f, 0.0));
 
 	for (unsigned int c = 0; c < testChunk.chunks.size(); c++)
 	{
@@ -351,20 +358,46 @@ int main()
 				{
 					if(j > 3)
 					{
-						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::GRASS, glm::vec3(i, j, k), true, false);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkManager::blockTypes::GRASS, glm::vec3(i, j, k), true, false);
 					}
 					else if(j > 0 && j <= 3)
 					{
-						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::DIRT, glm::vec3(i, j, k), true, false);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkManager::blockTypes::DIRT, glm::vec3(i, j, k), true, false);
 					}
 					else if(j <= 0)
 					{
-						testChunk.setBlock(&testChunk.chunks.at(c), ChunkTest::blockTypes::STONE, glm::vec3(i, j, k), true, false);
+						testChunk.setBlock(&testChunk.chunks.at(c), ChunkManager::blockTypes::STONE, glm::vec3(i, j, k), true, false);
 					}
 				}
 			}
 		}
 	}
+
+	float crosshairVertices[] =
+	{
+		-0.05f, -0.05f, 0.0f, 0.0f, 0.0f,
+		-0.05f,  0.05f, 0.0f, 0.0f, 1.0f,
+		 0.05f,  0.05f, 0.0f, 1.0f, 1.0f,
+		 0.05f, -0.05f, 0.0f, 1.0f, 0.0f,
+	};
+
+	unsigned int crosshairIndecies[] =
+	{
+		0,1,2,
+		0,2,3
+	};
+
+	// Crosshair
+	VAO crosshairVAO;
+	crosshairVAO.Bind();
+
+	VBO crosshairVBO(crosshairVertices, sizeof(crosshairVertices));
+	EBO CrosshairEBO(crosshairIndecies, sizeof(crosshairIndecies));
+	crosshairVAO.LinkAttrib(crosshairVBO, 0, 3, GL_FLOAT, 5 * sizeof(float), (void*)0);
+	crosshairVAO.LinkAttrib(crosshairVBO, 1, 2, GL_FLOAT, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	crosshairVAO.Unbind();
+	crosshairVBO.Unbind();
+	CrosshairEBO.Unbind();
 
 	// Front face
 	VAO BlocksFrontVAO;
@@ -444,7 +477,7 @@ int main()
 	
 	double currentFrame;
 
-	VAO vao[8] = {
+	VAO vao[9] = {
 		BlocksFrontVAO ,
 		BlocksBackVAO,
 		BlocksUpperVAO,
@@ -452,26 +485,27 @@ int main()
 		BlocksLeftVAO,
 		BlocksRightVAO,
 		skyVAO,
-		planeVao 
+		planeVao,
+		crosshairVAO,
 	};
 
-	std::thread loadChunks(ChunkTest::Chunk::ChunkThread, &testChunk, &camera);
+	std::thread loadChunks(ChunkManager::Chunk::ChunkThread, &testChunk, &camera);
 
 	std::thread playerThread(Physics::Player::checkCurrentChunk, &testChunk, &camera);
 
 	std::thread processInputThread(Physics::Player::Process, &testChunk, &camera);
 
-	std::thread CheckChunks(ChunkTest::Chunk::ChenkPriorityThread, &testChunk, &camera);
+	std::thread CheckChunks(ChunkManager::Chunk::ChenkPriorityThread, &testChunk, &camera);
 
-	std::thread SortingThread(ChunkTest::Chunk::SortingThread, &testChunk, &camera);
+	std::thread SortingThread(ChunkManager::Chunk::SortingThread, &testChunk, &camera);
 
-	std::thread loadBlocks(ChunkTest::Chunk::checkChunkThread, &testChunk, &camera);
+	std::thread loadBlocks(ChunkManager::Chunk::checkChunkThread, &testChunk, &camera);
 
 	std::thread processPlaceablesThread(Physics::Player::ProcessPlaceables, &testChunk, &camera);
 
 	unsigned int renderedCounter = 0;
 
-	std::vector<ChunkTest::chunk_t*> ChunkList;
+	std::vector<ChunkManager::chunk_t*> ChunkList;
 
 	
 
@@ -528,9 +562,9 @@ int main()
 			renderedCounter = 0;
 		}
 
-		for (ChunkTest::chunk_t* ck : ChunkList)
+		for (ChunkManager::chunk_t* ck : ChunkList)
 		{
-			for (ChunkTest::block* bk : ck->renderedBlocks)
+			for (ChunkManager::block* bk : ck->renderedBlocks)
 			{
 				shader.setMat4("model", bk->model);
 
@@ -540,19 +574,19 @@ int main()
 					{
 						vao[i].Bind();
 
-						if (bk->type == ChunkTest::blockTypes::GRASS)
+						if (bk->type == ChunkManager::blockTypes::GRASS)
 						{
 							camera.textures[0].Bind();
 						}
-						else if (bk->type == ChunkTest::blockTypes::DIRT)
+						else if (bk->type == ChunkManager::blockTypes::DIRT)
 						{
 							camera.textures[1].Bind();
 						}
-						else if (bk->type == ChunkTest::blockTypes::WOOD)
+						else if (bk->type == ChunkManager::blockTypes::WOOD)
 						{
 							camera.textures[2].Bind();
 						}
-						else if (bk->type == ChunkTest::blockTypes::STONE)
+						else if (bk->type == ChunkManager::blockTypes::STONE)
 						{
 							camera.textures[3].Bind();
 						}
@@ -616,19 +650,19 @@ int main()
 		}
 
 
+
 		/* Placeable Block */
 
 		if (true)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			glm::mat4 ChunkModel = glm::mat4(1.0f);
 
 			glm::vec3 pos = glm::vec3(1.0f);
 
 
-			pos.x = camera.placeableBlock.x;
-			pos.y = camera.placeableBlock.y;
-			pos.z = camera.placeableBlock.z;
+			pos.x = (int)camera.placeableBlock.x;
+			pos.y = (int)camera.placeableBlock.y;
+			pos.z = (int)camera.placeableBlock.z;
 
 			model = glm::translate(model, pos);
 
@@ -637,19 +671,19 @@ int main()
 				shader.setMat4("model", model);
 				vao[i].Bind();
 				
-				if (camera.currentBlock == ChunkTest::blockTypes::GRASS)
+				if (camera.currentBlock == ChunkManager::blockTypes::GRASS)
 				{
 					camera.textures[0].Bind();
 				}
-				if (camera.currentBlock == ChunkTest::blockTypes::DIRT)
+				if (camera.currentBlock == ChunkManager::blockTypes::DIRT)
 				{
 					camera.textures[1].Bind();
 				}
-				if (camera.currentBlock == ChunkTest::blockTypes::WOOD)
+				if (camera.currentBlock == ChunkManager::blockTypes::WOOD)
 				{
 					camera.textures[2].Bind();
 				}
-				if (camera.currentBlock == ChunkTest::blockTypes::STONE)
+				if (camera.currentBlock == ChunkManager::blockTypes::STONE)
 				{
 					camera.textures[3].Bind();
 				}
@@ -660,6 +694,16 @@ int main()
 			}
 			shader.setMat4("model", glm::mat4(1.0));
 
+		}
+
+		// draw looking position
+		{
+			Crosshairshader.Avtivate();
+			Crosshairshader.setInt("tex0", 0);
+			vao[8].Bind();
+			textures[5].Bind();
+			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+			vao[8].Unbind();
 		}
 
 		///////////////////////
@@ -781,19 +825,19 @@ void processInput(
 	}
 	if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
 	{
-		camera.currentBlock = ChunkTest::blockTypes::GRASS;
+		camera.currentBlock = ChunkManager::blockTypes::GRASS;
 	}
 	if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
 	{
-		camera.currentBlock = ChunkTest::blockTypes::DIRT;
+		camera.currentBlock = ChunkManager::blockTypes::DIRT;
 	}
 	if (glfwGetKey(window, GLFW_KEY_3) == GLFW_PRESS)
 	{
-		camera.currentBlock = ChunkTest::blockTypes::WOOD;
+		camera.currentBlock = ChunkManager::blockTypes::WOOD;
 	}
 	if (glfwGetKey(window, GLFW_KEY_4) == GLFW_PRESS)
 	{
-		camera.currentBlock = ChunkTest::blockTypes::STONE;
+		camera.currentBlock = ChunkManager::blockTypes::STONE;
 	}
 
 	if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS)

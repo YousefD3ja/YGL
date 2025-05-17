@@ -7,7 +7,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <objects.h>
 
-namespace ChunkTest
+namespace ChunkManager
 {
 	class Chunk;
 	typedef struct chunk;
@@ -33,7 +33,7 @@ const float ZOOM = 45.0f;
 
 
 
-class Camera
+class PlayerObject
 {
 	public:
 		// euler Angles
@@ -46,7 +46,7 @@ class Camera
 		float Hight;
 		bool isRunning;
 
-		Camera(glm::vec3 position, Texture2D* textures, int textureListSize);
+		PlayerObject(glm::vec3 position, Texture2D* textures, int textureListSize);
 
 		// camera position
 		glm::vec3 Position;
@@ -76,14 +76,16 @@ class Camera
 
 		glm::vec3 direction;
 
+		glm::vec3 CrosshairFront;
+
 
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
 
 
-		ChunkTest::chunk* currentChunk;
+		ChunkManager::chunk* currentChunk;
 
-		ChunkTest::blockTypes currentBlock;
+		ChunkManager::blockTypes currentBlock;
 
 		bool placedBlock;
 

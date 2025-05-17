@@ -15,10 +15,10 @@
 #include <camera.h>
 #include <algorithm>
 
-class Camera;
+class PlayerObject;
 
 
-namespace ChunkTest
+namespace ChunkManager
 {
 	
 
@@ -70,17 +70,17 @@ namespace ChunkTest
 
 		static void setBlock(chunk_t* _chunk, blockTypes type, glm::vec3 position, bool IsSolid, bool Placed);
 
-		static void checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, Camera* player);
+		static void checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, PlayerObject* player);
 
-		static void checkThread(Chunk* testChunk, Camera* player);
+		static void checkThread(Chunk* testChunk, PlayerObject* player);
 
-		static void checkChunkThread(Chunk* Chunk, Camera* player);
+		static void checkChunkThread(Chunk* Chunk, PlayerObject* player);
 
-		static void ChunkThread(Chunk* chunkList, Camera* camera);
+		static void ChunkThread(Chunk* chunkList, PlayerObject* camera);
 
-		static void ChenkPriorityThread(Chunk* chunkList, Camera* player);
+		static void ChenkPriorityThread(Chunk* chunkList, PlayerObject* player);
 
-		static void SortingThread(Chunk* chunkList, Camera* player);
+		static void SortingThread(Chunk* chunkList, PlayerObject* player);
 
 		
 

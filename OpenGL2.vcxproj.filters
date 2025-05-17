@@ -54,6 +54,7 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="README.md" />
+    <None Include="res\crosshair.shader" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\sdl2lp\sdl2LP\src\images\background.png">

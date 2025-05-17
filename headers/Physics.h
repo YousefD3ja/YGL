@@ -8,15 +8,25 @@ namespace Physics
 	class Player
 	{
 	public:
-		static void checkCurrentChunk(ChunkTest::Chunk* chunkList, Camera* player);
+		static void checkCurrentChunk(ChunkManager::Chunk* chunkList, PlayerObject* player);
 
-		static void placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTypes type, Camera* player);
+		static void placeBlock(ChunkManager::Chunk* chunkList, ChunkManager::blockTypes type, PlayerObject* player);
 
-		static void DeleteBlocks(ChunkTest::Chunk* chunkList, Camera* player);
+		static void DeleteBlocks(ChunkManager::Chunk* chunkList, PlayerObject* player);
 
-		static void Process(ChunkTest::Chunk* chunkList, Camera* player);
+		static void Process(ChunkManager::Chunk* chunkList, PlayerObject* player);
 
-		static void ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* player);
+		static void ProcessPlaceables(ChunkManager::Chunk* chunkList, PlayerObject* player);
 	};
 }
+
+namespace Engine
+{
+	class Physics
+	{
+	public:
+		void CalculateGravity(ChunkManager::Chunk* chunkList, PlayerObject player);
+	};
+}
+
 #endif

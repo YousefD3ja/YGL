@@ -1,12 +1,12 @@
 #include <Physics.h>
 
-void Physics::Player::checkCurrentChunk(ChunkTest::Chunk* chunkList, Camera* player)
+void Physics::Player::checkCurrentChunk(ChunkManager::Chunk* chunkList, PlayerObject* player)
 {
 	while (true)
 	{
 		for (unsigned int i = 0; i < chunkList->chunks.size(); i++)
 		{
-			ChunkTest::chunk_t* ck = &chunkList->chunks.at(i);
+			ChunkManager::chunk_t* ck = &chunkList->chunks.at(i);
 			if (
 				((player->Position.x < ck->Position.x + 8) && (player->Position.x > ck->Position.x - 8)) &&
 				((player->Position.z < ck->Position.z + 8) && (player->Position.z > ck->Position.z - 8))
@@ -18,16 +18,16 @@ void Physics::Player::checkCurrentChunk(ChunkTest::Chunk* chunkList, Camera* pla
 	}
 }
 
-void Physics::Player::placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTypes type, Camera* player)
+void Physics::Player::placeBlock(ChunkManager::Chunk* chunkList, ChunkManager::blockTypes type, PlayerObject* player)
 {
-	ChunkTest::chunk_t* chunk = nullptr;
+	ChunkManager::chunk_t* chunk = nullptr;
 
 	for (unsigned int c = 0; c < chunkList->loadedChunks.size(); c++)
 	{
-		ChunkTest::chunk_t* ck = chunkList->loadedChunks.at(c);
+		ChunkManager::chunk_t* ck = chunkList->loadedChunks.at(c);
 		if (
-			((player->placeableBlock.x <= ck->Position.x + 8) && (player->placeableBlock.x >= ck->Position.x - 8)) &&
-			((player->placeableBlock.z <= ck->Position.z + 8) && (player->placeableBlock.z >= ck->Position.z - 8))
+			(((int)player->placeableBlock.x <= ck->Position.x + 8) && ((int)player->placeableBlock.x >= ck->Position.x - 8)) &&
+			(((int)player->placeableBlock.z <= ck->Position.z + 8) && ((int)player->placeableBlock.z >= ck->Position.z - 8))
 			)
 		{
 			chunk = ck;
@@ -37,7 +37,7 @@ void Physics::Player::placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTy
 
 	if (chunk != nullptr)
 	{
-		ChunkTest::block* tempBlock;
+		ChunkManager::block* tempBlock;
 		bool emptyPos = true;
 
 		for (unsigned int i = 0; i < chunk->blocks.size(); i++)
@@ -52,25 +52,30 @@ void Physics::Player::placeBlock(ChunkTest::Chunk* chunkList, ChunkTest::blockTy
 		}
 		if(emptyPos)
 		{
-			ChunkTest::Chunk::setBlock(chunk, type, player->placeableBlock, true, true);
+			ChunkManager::Chunk::setBlock(chunk, type, player->placeableBlock, true, true);
 		}
 	}
 	Sleep(5);
 }
 
-void Physics::Player::DeleteBlocks(ChunkTest::Chunk* chunkList, Camera* player)
+void Physics::Player::DeleteBlocks(ChunkManager::Chunk* chunkList, PlayerObject* player)
 {
 
-	std::vector<ChunkTest::block> temp;
-	std::vector<ChunkTest::block*> tempP;
-	ChunkTest::block* b = nullptr;
+	std::vector<ChunkManager::block> temp;
+	std::vector<ChunkManager::block*> tempP;
+	ChunkManager::block* b = nullptr;
 
-	ChunkTest::chunk_t* chunk = nullptr;
+	glm::vec3 pos = glm::vec3(1.0f);
+	pos.x = (int)player->placeableBlock.x;
+	pos.y = (int)player->placeableBlock.y;
+	pos.z = (int)player->placeableBlock.z;
+
+	ChunkManager::chunk_t* chunk = nullptr;
 	for (auto c : chunkList->sortedChunks)
 	{
 		if (
-			((player->placeableBlock.x <= c->Position.x + 8) && (player->placeableBlock.x >= c->Position.x - 8)) &&
-			((player->placeableBlock.z <= c->Position.z + 8) && (player->placeableBlock.z >= c->Position.z - 8))
+			(((int)player->placeableBlock.x <= c->Position.x + 8) && ((int)player->placeableBlock.x >= c->Position.x - 8)) &&
+			(((int)player->placeableBlock.z <= c->Position.z + 8) && ((int)player->placeableBlock.z >= c->Position.z - 8))
 			)
 		{
 			chunk = c;
@@ -85,7 +90,7 @@ void Physics::Player::DeleteBlocks(ChunkTest::Chunk* chunkList, Camera* player)
 
 			if(b != nullptr)
 			{
-				if (b->Position != player->placeableBlock)
+				if (b->Position != pos)
 				{
 					temp.push_back(*b);
 				}
@@ -98,7 +103,7 @@ void Physics::Player::DeleteBlocks(ChunkTest::Chunk* chunkList, Camera* player)
 		for (unsigned int i = 0; i < temp.size(); i++)
 		{
 			b = &temp.at(i);
-			ChunkTest::Chunk::checkSolidBlocks(b, chunk, new std::vector<ChunkTest::block*>, player);
+			ChunkManager::Chunk::checkSolidBlocks(b, chunk, new std::vector<ChunkManager::block*>, player);
 		}
 		chunk->blocks = temp;
 		Sleep(5);
@@ -107,7 +112,7 @@ void Physics::Player::DeleteBlocks(ChunkTest::Chunk* chunkList, Camera* player)
 
 
 
-void Physics::Player::Process(ChunkTest::Chunk* chunkList, Camera* player)
+void Physics::Player::Process(ChunkManager::Chunk* chunkList, PlayerObject* player)
 {
 	while (true)
 	{
@@ -125,16 +130,21 @@ void Physics::Player::Process(ChunkTest::Chunk* chunkList, Camera* player)
 	}
 }
 
-void Physics::Player::ProcessPlaceables(ChunkTest::Chunk* chunkList, Camera* player)
+void Physics::Player::ProcessPlaceables(ChunkManager::Chunk* chunkList, PlayerObject* player)
 {
-	ChunkTest::chunk_t* ck = nullptr;
-	ChunkTest::block* bk = nullptr;
+	ChunkManager::chunk_t* ck = nullptr;
+	ChunkManager::block* bk = nullptr;
 	while (true)
 	{
 		
-		player->placeableBlock.x = (int)(player->Position.x + player->Front.x * player->range);
-		player->placeableBlock.y = (int)(player->Position.y + player->Front.y * player->range);
-		player->placeableBlock.z = (int)(player->Position.z + player->Front.z * player->range);
+		player->placeableBlock.x = (player->Position.x + player->Front.x * player->range);
+		player->placeableBlock.y = (player->Position.y + player->Front.y * player->range);
+		player->placeableBlock.z = (player->Position.z + player->Front.z * player->range);
 		Sleep(5);
 	}
+}
+
+void Engine::Physics::CalculateGravity(ChunkManager::Chunk* chunkList, PlayerObject player)
+{
+
 }

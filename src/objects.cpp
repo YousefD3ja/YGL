@@ -1,6 +1,6 @@
 #include <objects.h>
 
-ChunkTest::Chunk::Chunk(glm::vec3 position)
+ChunkManager::Chunk::Chunk(glm::vec3 position)
 {
     //addChunk();
     addChunkList(50);
@@ -10,7 +10,7 @@ ChunkTest::Chunk::Chunk(glm::vec3 position)
     chunks.push_back(chunk);*/
 }
 
-void ChunkTest::Chunk::addChunk()
+void ChunkManager::Chunk::addChunk()
 {
     chunk_t temp;
     if (chunks.size() > 0) temp = chunks.back();
@@ -27,7 +27,7 @@ void ChunkTest::Chunk::addChunk()
     chunks.push_back(chunk);
 }
 
-void ChunkTest::Chunk::addChunkList(int count)
+void ChunkManager::Chunk::addChunkList(int count)
 {
 
     chunk_t temp;
@@ -54,7 +54,7 @@ void ChunkTest::Chunk::addChunkList(int count)
     }
 }
 
-void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 position, bool IsSolid, bool Placed)
+void ChunkManager::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 position, bool IsSolid, bool Placed)
 {
     position.x = (int)position.x;
     position.y = (int)position.y;
@@ -78,7 +78,7 @@ void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 posit
             b.Position = temp * glm::vec4(position,1.0f);
             b.IsSolid = IsSolid;
         }
-		ChunkTest::Chunk::checkSolidBlocks(&b, chunk, &chunk->renderedBlocks, nullptr);
+		ChunkManager::Chunk::checkSolidBlocks(&b, chunk, &chunk->renderedBlocks, nullptr);
         chunk->blocks.push_back(b);
     }
     else 
@@ -104,7 +104,7 @@ void ChunkTest::Chunk::setBlock(chunk_t* chunk, blockTypes type, glm::vec3 posit
 
 }
 
-void ChunkTest::Chunk::checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, Camera* player)
+void ChunkManager::Chunk::checkSolidBlocks(block* _block, chunk_t* _chunk, std::vector<block*>* temp, PlayerObject* player)
 {
     block* b;
 	_block->renderFaces[0] = true;
@@ -181,14 +181,14 @@ void ChunkTest::Chunk::checkSolidBlocks(block* _block, chunk_t* _chunk, std::vec
     _block->isLoaded = true;
 }
 
-void ChunkTest::Chunk::ChunkThread(Chunk* chunkList, Camera* player)
+void ChunkManager::Chunk::ChunkThread(Chunk* chunkList, PlayerObject* player)
 {
     std::vector<chunk_t*> temp;
     while(true)
     {
         for (unsigned int c = 0; c < chunkList->chunks.size(); c++)
         {
-            ChunkTest::chunk_t* ck = &chunkList->chunks.at(c);
+            ChunkManager::chunk_t* ck = &chunkList->chunks.at(c);
 
             if (
                 ((player->Position.x > player->Front.x) && (player->Position.x + 32 > ck->Position.x)) ||
@@ -207,7 +207,7 @@ void ChunkTest::Chunk::ChunkThread(Chunk* chunkList, Camera* player)
 }
 
 
-void ChunkTest::Chunk::ChenkPriorityThread(Chunk* chunkList, Camera* player)
+void ChunkManager::Chunk::ChenkPriorityThread(Chunk* chunkList, PlayerObject* player)
 {
     std::vector<chunk_t*> copy;
 
@@ -251,7 +251,7 @@ void ChunkTest::Chunk::ChenkPriorityThread(Chunk* chunkList, Camera* player)
     }
 }
 
-void ChunkTest::Chunk::SortingThread(Chunk* chunkList, Camera* player)
+void ChunkManager::Chunk::SortingThread(Chunk* chunkList, PlayerObject* player)
 {
     std::vector<chunk_t*> temp;
     std::vector<chunk_t*> copy;
@@ -282,7 +282,7 @@ void ChunkTest::Chunk::SortingThread(Chunk* chunkList, Camera* player)
 }
 
 
-void ChunkTest::Chunk::checkChunkThread(Chunk* ChunkList, Camera* player)
+void ChunkManager::Chunk::checkChunkThread(Chunk* ChunkList, PlayerObject* player)
 {
     block* b;
     std::vector<block*> temp;

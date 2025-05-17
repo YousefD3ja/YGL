@@ -1,7 +1,7 @@
 #include <camera.h>
 
 
-Camera::Camera(glm::vec3 position, Texture2D* textureList, int textureListSize)
+PlayerObject::PlayerObject(glm::vec3 position, Texture2D* textureList, int textureListSize)
 {
 	Position = position;
 	WorldUp = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -12,24 +12,24 @@ Camera::Camera(glm::vec3 position, Texture2D* textureList, int textureListSize)
 	fov = ZOOM;
 	Front = glm::vec3(0.0f, 0.0f, -1.0f);
 	Hight = position.y;
-	currentBlock = ChunkTest::blockTypes::GRASS;
+	currentBlock = ChunkManager::blockTypes::GRASS;
 	currentChunk = nullptr;
 	textures = textureList;
 	textureListSize = textureListSize;
 	updateCameraVectors();
 }
 
-void Camera::setCameraView()
+void PlayerObject::setCameraView()
 {
 	view = glm::lookAt(Position, Position + Front, Up);
 }
 
-void Camera::SetPerspective(float angle, float screenWidth, float screenHeight, float nearf, float farf)
+void PlayerObject::SetPerspective(float angle, float screenWidth, float screenHeight, float nearf, float farf)
 {
 	projection = glm::perspective(glm::radians(angle), screenWidth / screenHeight, nearf, farf);
 }
 
-void Camera::updateCameraVectors()
+void PlayerObject::updateCameraVectors()
 {
 	glm::vec3 front;
 	front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
@@ -37,7 +37,12 @@ void Camera::updateCameraVectors()
 	front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
 	Front = glm::normalize(front);
 
-	placeableBlock = Front;
+	glm::vec3 Crosshair;
+	front.x = cos(glm::radians(-Yaw)) * cos(glm::radians(-Pitch));
+	front.y = sin(glm::radians(-Pitch));
+	front.z = sin(glm::radians(-Yaw)) * cos(glm::radians(-Pitch));
+	CrosshairFront = glm::normalize(Crosshair);
+
 
 	uFront = front;
 
@@ -48,7 +53,7 @@ void Camera::updateCameraVectors()
 
 }
 
-void Camera::ProcessKeyboard(cameraMovement direction, float deltaTime) 
+void PlayerObject::ProcessKeyboard(cameraMovement direction, float deltaTime) 
 {
 	float velocity = MovementSpeed * deltaTime;
 	if (direction == FORWARD)
@@ -67,7 +72,7 @@ void Camera::ProcessKeyboard(cameraMovement direction, float deltaTime)
 
 }
 
-void Camera::ProcessCameraPos()
+void PlayerObject::ProcessCameraPos()
 {
 
 	if (Position.y > 2.5)
